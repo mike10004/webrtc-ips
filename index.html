@@ -21,6 +21,7 @@
         <ul></ul>
         <h4>Your IPv6 addresses:</h4>
         <ul></ul>
+        <div id="raw"></div>
         <iframe id="iframe" sandbox="allow-same-origin" style="display: none"></iframe>
         <script>
             //get the IP addresses associated with an account
@@ -52,14 +53,7 @@
                     optional: [{RtpDataChannels: true}]
                 };
 
-                //firefox already has a default stun server in about:config
-                //    media.peerconnection.default_iceservers =
-                //    [{"url": "stun:stun.services.mozilla.com"}]
-                var servers = undefined;
-
-                //add same stun server for chrome
-                if(useWebKit)
-                    servers = {iceServers: [{urls: "stun:stun.services.mozilla.com"}]};
+                var servers = {iceServers: [{urls: "stun:stun.services.mozilla.com"}]};
 
                 //construct a new RTCPeerConnection
                 var pc = new RTCPeerConnection(servers, mediaConstraints);
@@ -97,8 +91,13 @@
 
                 //wait for a while to let everything done
                 setTimeout(function(){
+                    const rawInfo = pc.localDescription.sdp;
+                    const rawEl = document.getElementById("raw");
+                    if (rawEl) {
+                      rawEl.innerText = rawInfo;
+                    }
                     //read candidate info from local description
-                    var lines = pc.localDescription.sdp.split('\n');
+                    var lines = rawInfo.split('\n');
 
                     lines.forEach(function(line){
                         if(line.indexOf('a=candidate:') === 0)
